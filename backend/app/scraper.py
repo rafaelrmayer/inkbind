@@ -37,8 +37,6 @@ def validate_url(url: str) -> str:
         raise UnsafeURLError("A URL deve usar HTTP ou HTTPS e conter um host")
     if parts.username is not None or parts.password is not None:
         raise UnsafeURLError("Credenciais na URL não são permitidas")
-    if parts.fragment:
-        parts = parts._replace(fragment="")
     if port is not None and port != (443 if scheme == "https" else 80):
         raise UnsafeURLError("Porta não permitida")
 
@@ -68,9 +66,9 @@ def validate_url(url: str) -> str:
             if not parsed_ip.is_global:
                 raise UnsafeURLError("O host resolve para um endereço IP não público")
 
-    netloc = hostname
+    netloc = f"[{hostname}]" if ":" in hostname else hostname
     if port is not None:
-        netloc = f"{hostname}:{port}"
+        netloc = f"{netloc}:{port}"
     return urlunsplit((scheme, netloc, parts.path or "/", parts.query, ""))
 
 
